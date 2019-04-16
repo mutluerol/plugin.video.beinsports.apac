@@ -5,6 +5,7 @@ from matthuisman.exceptions import PluginError
 
 from .api import API
 from .language import _
+from .constants import WV_LICENSE_URL
 
 api = API()
 
@@ -79,11 +80,19 @@ def login(**kwargs):
 @plugin.route()
 @plugin.login_required()
 def play(channel_id=None, vod_id=None, **kwargs):
-    mpd_url, license, headers = api.play(channel_id, vod_id)
+    asset = api.play(channel_id, vod_id)
+
+    mpd_url = '{}?{}'.format(asset['Path'], asset['CdnTicket'])
+
+    headers = {
+        'Authorization':   asset['DrmToken'],
+        'X-CB-Ticket':     asset['DrmTicket'],
+        'X-ErDRM-Message': asset['DrmTicket'],
+    }
 
     return plugin.Item(
         path = mpd_url,
-        inputstream = inputstream.Widevine(license_key=license),
+        inputstream = inputstream.Widevine(license_key=WV_LICENSE_URL),
         headers = headers,
     )
 

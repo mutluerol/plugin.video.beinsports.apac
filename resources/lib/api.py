@@ -6,7 +6,7 @@ from matthuisman import userdata, settings
 from matthuisman.session import Session
 from matthuisman.exceptions import Error
 
-from .constants import HEADERS, API_BASE, TOKEN_COOKIE_KEY, WV_LICENSE_URL, PAGESIZE
+from .constants import HEADERS, API_BASE, TOKEN_COOKIE_KEY, PAGESIZE
 from .language import _
 
 class APIError(Error):
@@ -108,16 +108,7 @@ class API(object):
         if 'List' not in data:
             raise APIError(_.NO_STREAM)
 
-        selected = data['List'][0]
-        mpd_url =  '{}?{}'.format(selected['Path'], selected['CdnTicket'])
-
-        license_headers = {
-            'Authorization': selected['DrmToken'],
-            'X-CB-Ticket': selected['DrmTicket'],
-            'X-ErDRM-Message': selected['DrmTicket'],
-        }
-
-        return mpd_url, WV_LICENSE_URL, license_headers
+        return data['List'][0]
 
     def logout(self):
         userdata.delete('token')
