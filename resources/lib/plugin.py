@@ -104,43 +104,54 @@ def logout(**kwargs):
     api.logout()
     gui.refresh()
 
+@plugin.route()
 @plugin.login_required()
-def playlist():
-    playlist_data = []
+def playlist(output, **kwargs):
+    playlist = '#EXTM3U x-tvg-url=""\n\n'
 
     for row in api.live_channels():
-        channel = {
-            'id': row['Id'],
-            'display-name': row['Name'],
-            'icon': row['Logo'].replace('_114X66', ''),
-            'url': plugin.url_for(play, channel_id=row['Id']),
-        }
+        playlist += '#EXTINF:-1 tvg-id="{id}" tvg-logo="{logo}",{name}\n{path}\n\n'.format(
+            id=row['Id'], logo=row['Logo'].replace('_114X66', ''), name=row['Name'], path=plugin.url_for(play, channel_id=row['Id']))
 
-        playlist_data.append(channel)
+    playlist = playlist.strip()
+    with open(output, 'w') as f:
+        f.write(playlist)
 
-    return playlist_data
-
+@plugin.route()
 @plugin.login_required()
-def epg():
-    epg_data = []
+def epg(output, **kwargs):
+    import xml.etree.ElementTree as ET
+
+    root_element = ET.Element("tv")
 
     for row in api.epg():
-        channel = {
-            'id': row['ChannelId'],
-            'display-name': row['ChannelName'],
-            'icon': row['ChannelLogo'].replace('_114X66', ''),
-            'programs': [],
-        }
+        channel = ET.Element("channel")
+        
+        channel.set("id", row['ChannelId'])
+        elem = ET.Element("display-name")
+        elem.text = row['ChannelName']
+        channel.append(elem)
+        elem = ET.Element("icon")
+        elem.set("src", row['ChannelLogo'].replace('_114X66', ''))
+        channel.append(elem)
 
-        for row2 in row['Programs']:
-            channel['programs'].append({
-                'start': int(arrow.get(row2['StartTime']).to('utc').format('X')),
-                'stop': int(arrow.get(row2['EndTime']).to('utc').format('X')),
-                'title': row2['Name'],
-                'desc': row2['Description'],
-              #  'sub-title': row2['Description'],
-            })
+        root_element.append(channel)
 
-        epg_data.append(channel)
+        for row2 in row.get('Programs', []):
+            program = ET.Element("programme")
 
-    return epg_data
+            program.set("channel", row['ChannelId'])
+            program.set("start", arrow.get(row2['StartTime']).format('YYYYMMDDHHmmss Z'))
+            program.set("stop", arrow.get(row2['EndTime']).format('YYYYMMDDHHmmss Z'))
+
+            title = ET.Element("title")
+            title.text = row2['Name']
+            program.append(title)
+            desc = ET.Element("desc")
+            desc.text = row2['Description']
+            program.append(desc)
+
+            root_element.append(program)
+
+    with open(output, 'w') as f:
+        f.write(b'<?xml version="1.0" encoding="utf-8" ?>\n' + ET.tostring(root_element, encoding="utf-8"))
