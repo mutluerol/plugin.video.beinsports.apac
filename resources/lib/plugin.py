@@ -103,3 +103,44 @@ def logout(**kwargs):
 
     api.logout()
     gui.refresh()
+
+@plugin.login_required()
+def epg():
+    epg_data = []
+
+    for row in api.epg():
+        channel = {
+            'id': row['ChannelId'],
+            'display-name': row['ChannelName'],
+            'icon': row['ChannelLogo'].replace('_114X66', ''),
+            'programs': [],
+        }
+
+        for row2 in row['Programs']:
+            channel['programs'].append({
+                'start': int(arrow.get(row2['StartTime']).to('utc').format('X')),
+                'stop': int(arrow.get(row2['EndTime']).to('utc').format('X')),
+                'title': row2['Name'],
+                'desc': row2['Description'],
+              #  'sub-title': row2['Description'],
+            })
+
+        epg_data.append(channel)
+
+    return epg_data
+
+@plugin.login_required()
+def playlist():
+    playlist_data = []
+
+    for row in api.live_channels():
+        channel = {
+            'id': row['Id'],
+            'display-name': row['Name'],
+            'icon': row['Logo'].replace('_114X66', ''),
+            'url': plugin.url_for(play, channel_id=row['Id']),
+        }
+
+        playlist_data.append(channel)
+
+    return playlist_data

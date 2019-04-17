@@ -1,6 +1,7 @@
 import json
 import re
 import math
+import arrow
 
 from matthuisman import userdata, settings
 from matthuisman.session import Session
@@ -40,7 +41,7 @@ class API(object):
         }
 
         data = self._session.post('/api/init', json=payload).json()
-        access_token = data['AccessToken']
+        #access_token = data['AccessToken']
 
         payload = {
             #'Action' : '/View/Account/SubmitLogin',
@@ -77,6 +78,18 @@ class API(object):
                 break
 
         return items
+
+    def epg(self, start=None, end=None):
+        start = start or arrow.utcnow()
+        end   = end or start.shift(days=7)
+
+        payload = {
+            'StartTime': start.format('YYYY-MM-DDTHH:mm:00.000') + 'Z',
+            'EndTime':   end.format('YYYY-MM-DDTHH:mm:00.000') + 'Z',
+            'OnlyLiveEvents': 'false',
+        }
+
+        return self._session.post('/api/tvguide', json=payload).json()['List']
 
     def catch_up(self, catalog_id=''):
         items = []
