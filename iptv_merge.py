@@ -1,6 +1,7 @@
 from resources.lib import plugin
+from resources.lib.matthuisman import signals
 
-plugin.before_dispatch()
+signals.emit(signals.BEFORE_DISPATCH)
 
 def playlist():
     return plugin.playlist()
