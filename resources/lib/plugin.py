@@ -105,6 +105,22 @@ def logout(**kwargs):
     gui.refresh()
 
 @plugin.login_required()
+def playlist():
+    playlist_data = []
+
+    for row in api.live_channels():
+        channel = {
+            'id': row['Id'],
+            'display-name': row['Name'],
+            'icon': row['Logo'].replace('_114X66', ''),
+            'url': plugin.url_for(play, channel_id=row['Id']),
+        }
+
+        playlist_data.append(channel)
+
+    return playlist_data
+
+@plugin.login_required()
 def epg():
     epg_data = []
 
@@ -128,19 +144,3 @@ def epg():
         epg_data.append(channel)
 
     return epg_data
-
-@plugin.login_required()
-def playlist():
-    playlist_data = []
-
-    for row in api.live_channels():
-        channel = {
-            'id': row['Id'],
-            'display-name': row['Name'],
-            'icon': row['Logo'].replace('_114X66', ''),
-            'url': plugin.url_for(play, channel_id=row['Id']),
-        }
-
-        playlist_data.append(channel)
-
-    return playlist_data
