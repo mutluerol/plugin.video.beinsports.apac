@@ -52,7 +52,7 @@ class API(object):
             #"DeviceOsVersion": "",
             #"DeviceType": "",
             "IsRoot": "false",
-            "Language": "EN",
+            #"Language": "EN",
             #"OsArch": "",
             #"ScreenSize": "",
         }
