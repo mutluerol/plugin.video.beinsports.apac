@@ -35,9 +35,26 @@ class API(object):
         self.logout()
 
         payload = {
-            'ClientVersion': '1.2.5',
-            'DeviceName': 'AndroidPhone',
-            #'DeviceId': 'af62e6edf7dd3661',
+            "BuildNo": "121",
+            "ClientVersion": "1.2.5",
+            #"ConnectionType": "WIFI",
+            #"Country": "5244",
+            #"CpuAbi": "arm64-v8a",
+            #"CpuAbi2": "armeabi-v7a",
+            #"DeviceBrand": "",
+            #"DeviceFirmwareVersion": "",
+            #"DeviceHardware": "",
+            #"DeviceHardwareVersion": "",
+            #"DeviceId": "4572df18da524542",
+            "DeviceManufacturer": "",
+            "DeviceModel": "",
+            "DeviceName": "AndroidPhone",
+            #"DeviceOsVersion": "",
+            #"DeviceType": "",
+            "IsRoot": "false",
+            "Language": "EN",
+            #"OsArch": "",
+            #"ScreenSize": "",
         }
 
         data = self._session.post('/api/init', json=payload).json()
