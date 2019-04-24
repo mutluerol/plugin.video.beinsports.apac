@@ -1,7 +1,7 @@
 from .log import log
 from .constants import ADDON
 
-def format_string(string, _bold=False, _label=False, _color=None, _strip=True, **kwargs):
+def format_string(string, _bold=False, _label=False, _color=None, _strip=False, **kwargs):
     if kwargs:
         string = string.format(**kwargs)
 
@@ -70,6 +70,7 @@ class BaseLanguage(object):
     VERIFY_SSL                  = 32037
     IA_OVERRIDE                 = 32038
     SERVICE_DELAY               = 32039
+    MD5_MISMATCH                = 32040
 
     def __getattribute__(self, name):
         attr = object.__getattribute__(self, name)
