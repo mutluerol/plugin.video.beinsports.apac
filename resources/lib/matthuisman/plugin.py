@@ -50,6 +50,25 @@ def route(url=None):
         return decorated_function
     return lambda f: decorator(f, url)
 
+# @plugin.merge()
+def merge():
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            xbmc.executebuiltin('Skin.SetString(merge,started)')
+
+            try:
+                result = f(*args, **kwargs)
+            except:
+                xbmc.executebuiltin('Skin.SetString(merge,error)')
+                raise
+            else:
+                xbmc.executebuiltin('Skin.SetString(merge,ok)')
+                return result
+                
+        return decorated_function
+    return lambda f: decorator(f)
+
 def resolve():
     if _handle() > 0:
         xbmcplugin.endOfDirectory(_handle(), succeeded=False, updateListing=False, cacheToDisc=False)

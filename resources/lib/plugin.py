@@ -1,7 +1,5 @@
 import arrow
 
-import xbmc
-
 from xml.sax.saxutils import escape
 
 from matthuisman import plugin, gui, settings, userdata, signals, inputstream
@@ -110,39 +108,29 @@ def logout(**kwargs):
     gui.refresh()
 
 @plugin.route()
+@plugin.merge()
 @plugin.login_required()
 def playlist(output, **kwargs):
-    xbmc.executebuiltin('Skin.SetString(merge,started)')
-    try:
-        with open(output, 'wb') as f:
-            f.write('#EXTM3U\n\n')
+    with open(output, 'wb') as f:
+        f.write('#EXTM3U\n\n')
 
-            for row in api.live_channels():
-                f.write(u'#EXTINF:-1 tvg-id="{id}" tvg-logo="{logo}",{name}\n{path}\n\n'.format(
-                    id=row['Id'], logo=row['Logo'].replace('_114X66', ''), name=row['Name'], path=plugin.url_for(play, channel_id=row['Id'])))
-    except:
-        xbmc.executebuiltin('Skin.SetString(merge,error)')
-    else:
-        xbmc.executebuiltin('Skin.SetString(merge,ok)')
+        for row in api.live_channels():
+            f.write(u'#EXTINF:-1 tvg-id="{id}" tvg-logo="{logo}",{name}\n{path}\n\n'.format(
+                id=row['Id'], logo=row['Logo'].replace('_114X66', ''), name=row['Name'], path=plugin.url_for(play, channel_id=row['Id'])))
 
 @plugin.route()
+@plugin.merge()
 @plugin.login_required()
 def epg(output, **kwargs):
-    xbmc.executebuiltin('Skin.SetString(merge,started)')
-    try:
-        with open(output, 'wb') as f:
-            f.write('<?xml version="1.0" encoding="utf-8" ?>\n<tv>\n')
-            
-            for channel in api.epg():
-                f.write('<channel id="{}">\n<display-name>{}</display-name>\n<icon src="{}" />\n</channel>\n'.format(
-                    channel['ChannelId'], escape(channel['ChannelName']), escape(channel['ChannelLogo'].replace('_114X66', ''))))
+    with open(output, 'wb') as f:
+        f.write('<?xml version="1.0" encoding="utf-8" ?>\n<tv>\n')
+        
+        for channel in api.epg():
+            f.write('<channel id="{}">\n<display-name>{}</display-name>\n<icon src="{}" />\n</channel>\n'.format(
+                channel['ChannelId'], escape(channel['ChannelName']), escape(channel['ChannelLogo'].replace('_114X66', ''))))
 
-                for program in channel.get('Programs', []):
-                    f.write(u'<programme channel="{}" start="{}" stop="{}">\n<title>{}</title>\n<desc>{}</desc>\n</programme>\n'.format(
-                        channel['ChannelId'], arrow.get(program['StartTime']).format('YYYYMMDDHHmmss Z'), arrow.get(program['EndTime']).format('YYYYMMDDHHmmss Z'), escape(program['Name']), escape(program['Description'])))
+            for program in channel.get('Programs', []):
+                f.write(u'<programme channel="{}" start="{}" stop="{}">\n<title>{}</title>\n<desc>{}</desc>\n</programme>\n'.format(
+                    channel['ChannelId'], arrow.get(program['StartTime']).format('YYYYMMDDHHmmss Z'), arrow.get(program['EndTime']).format('YYYYMMDDHHmmss Z'), escape(program['Name']), escape(program['Description'])))
 
-            f.write('</tv>')
-    except:
-        xbmc.executebuiltin('Skin.SetString(merge,error)')
-    else:
-        xbmc.executebuiltin('Skin.SetString(merge,ok)')
+        f.write('</tv>')
