@@ -5,7 +5,7 @@ from functools import wraps
 import xbmc, xbmcplugin
 
 from . import router, gui, settings, userdata, inputstream, signals
-from .constants import ROUTE_SETTINGS, ROUTE_RESET, ROUTE_SERVICE, ROUTE_CLEAR_CACHE, ROUTE_IA_SETTINGS, ROUTE_IA_INSTALL, ADDON_ICON, ADDON_FANART, ADDON_ID
+from .constants import ROUTE_SETTINGS, ROUTE_RESET, ROUTE_SERVICE, ROUTE_CLEAR_CACHE, ROUTE_IA_SETTINGS, ROUTE_IA_INSTALL, ADDON_ICON, ADDON_FANART, ADDON_ID, ADDON_NAME
 from .log import log
 from .language import _
 from .exceptions import PluginError
@@ -61,8 +61,8 @@ def _error(e):
     except:
         error = e.message.encode('utf-8')
 
-    if not hasattr(e, 'heading'):
-        e.heading = _.PLUGIN_ERROR
+    if not hasattr(e, 'heading') or not e.heading:
+        e.heading = _(_.PLUGIN_ERROR, addon=ADDON_NAME)
 
     log.error(error)
     _close()
@@ -152,7 +152,7 @@ class Item(gui.Item):
 
 #Plugin.Folder()
 class Folder(object):
-    def __init__(self, items=None, title=None, content='videos', updateListing=False, cacheToDisc=True, sort_methods=None, thunb=None, fanart=None):
+    def __init__(self, items=None, title=None, content='videos', updateListing=False, cacheToDisc=True, sort_methods=None, thunb=None, fanart=None, no_items_label=_.NO_ITEMS):
         self.items = items or []
         self.title = title
         self.content = content
@@ -161,14 +161,19 @@ class Folder(object):
         self.sort_methods = sort_methods or [xbmcplugin.SORT_METHOD_UNSORTED, xbmcplugin.SORT_METHOD_LABEL, xbmcplugin.SORT_METHOD_DATEADDED]
         self.thunb = thunb or ADDON_ICON
         self.fanart = fanart or ADDON_FANART
+        self.no_items_label = no_items_label
 
     def display(self):
         handle = _handle()
 
-        for item in self.items:
-            if not item:
-                continue
+        items = [i for i in self.items if i]
+        if not items and self.no_items_label:
+            items.append(Item(
+                label = _(self.no_items_label, _label=True), 
+                is_folder = False,
+            ))
 
+        for item in items:
             item.art['thumb'] = item.art.get('thumb') or self.thunb
             item.art['fanart'] = item.art.get('fanart') or self.fanart
 

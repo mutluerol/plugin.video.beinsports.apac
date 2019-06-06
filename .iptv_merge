@@ -1,10 +1,5 @@
 {
-    "playlist": {
-        "url": "plugin://$ID/?_=playlist&output=$FILE",
-        "timeout": 10
-    },
-    "epg": {
-        "url": "plugin://$ID/?_=epg&output=$FILE",
-        "timeout": 10
-    }
+    "version":  2,
+    "playlist": "plugin://$ID/?_=playlist&output=$FILE",
+    "epg":      "plugin://$ID/?_=epg&output=$FILE"
 }

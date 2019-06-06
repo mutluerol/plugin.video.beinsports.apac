@@ -71,6 +71,7 @@ class BaseLanguage(object):
     IA_OVERRIDE                 = 32038
     SERVICE_DELAY               = 32039
     MD5_MISMATCH                = 32040
+    NO_ITEMS                    = 32041
 
     def __getattribute__(self, name):
         attr = object.__getattribute__(self, name)

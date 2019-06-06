@@ -7,7 +7,7 @@ import xbmc, xbmcaddon
 
 from . import gui, settings
 from .log import log
-from .constants import IA_ADDON_ID, IA_VERSION_KEY, IA_HLS_MIN_VER, IA_MPD_MIN_VER, IA_MODULES_URL, SESSION_CHUNKSIZE
+from .constants import IA_ADDON_ID, IA_VERSION_KEY, IA_HLS_MIN_VER, IA_MPD_MIN_VER, IA_MODULES_URL, SESSION_CHUNKSIZE, ADDON_DEV
 from .language import _
 from .util import get_kodi_version, md5sum, remove_file
 from .exceptions import InputStreamError

@@ -1,5 +1,9 @@
 import arrow
 
+import xbmc
+
+from xml.sax.saxutils import escape
+
 from matthuisman import plugin, gui, settings, userdata, signals, inputstream
 from matthuisman.exceptions import PluginError
 
@@ -27,6 +31,7 @@ def home(**kwargs):
         folder.add_item(label=_(_.MATCH_HIGHLIGHTS, _bold=True), path=plugin.url_for(catch_up, catalog_id='Match_Highlights', title=_.MATCH_HIGHLIGHTS))
         folder.add_item(label=_(_.INTERVIEWS, _bold=True), path=plugin.url_for(catch_up, catalog_id='Interviews', title=_.INTERVIEWS))
         folder.add_item(label=_(_.SPECIALS, _bold=True), path=plugin.url_for(catch_up, catalog_id='Specials', title=_.SPECIALS))
+        folder.add_item(label=_.LOGOUT, path=plugin.url_for(logout))
 
     folder.add_item(label=_.SETTINGS, path=plugin.url_for(plugin.ROUTE_SETTINGS))
 
@@ -41,7 +46,7 @@ def live_channels(**kwargs):
             label = row['Name'],
             art   = {'thumb': row['Logo'].replace('_114X66', '')},
             info  = {'plot': row.get('Description')},
-            path  = plugin.url_for(play, channel_id=row['Id'], is_live=True),
+            path  = plugin.url_for(play, channel_id=row['Id'], _is_live=True),
             playable = True,
         )
 
@@ -56,7 +61,7 @@ def catch_up(catalog_id='', title=_.CATCH_UP, **kwargs):
             label = row['Name'],
             art   = {'thumb': row.get('Headline')},
             info  = {'plot': row.get('Description')},
-            path  = plugin.url_for(play, vod_id=row['Id'], is_live=True),
+            path  = plugin.url_for(play, vod_id=row['Id']),
             playable = True,
         )
 
@@ -107,29 +112,37 @@ def logout(**kwargs):
 @plugin.route()
 @plugin.login_required()
 def playlist(output, **kwargs):
-    playlist = '#EXTM3U\n\n'
+    xbmc.executebuiltin('Skin.SetString(merge,started)')
+    try:
+        with open(output, 'wb') as f:
+            f.write('#EXTM3U\n\n')
 
-    for row in api.live_channels():
-        print(row)
-        playlist += u'#EXTINF:-1 tvg-id="{id}" tvg-logo="{logo}",{name}\n{path}\n\n'.format(
-            id=row['Id'], logo=row['Logo'].replace('_114X66', ''), name=row['Name'], path=plugin.url_for(play, channel_id=row['Id']))
-
-    with open(output, 'wb') as f:
-        f.write(playlist.strip().encode('utf-8'))
+            for row in api.live_channels():
+                f.write(u'#EXTINF:-1 tvg-id="{id}" tvg-logo="{logo}",{name}\n{path}\n\n'.format(
+                    id=row['Id'], logo=row['Logo'].replace('_114X66', ''), name=row['Name'], path=plugin.url_for(play, channel_id=row['Id'])))
+    except:
+        xbmc.executebuiltin('Skin.SetString(merge,error)')
+    else:
+        xbmc.executebuiltin('Skin.SetString(merge,ok)')
 
 @plugin.route()
 @plugin.login_required()
 def epg(output, **kwargs):
-    epg = '<?xml version="1.0" encoding="utf-8" ?>\n<tv>\n'
+    xbmc.executebuiltin('Skin.SetString(merge,started)')
+    try:
+        with open(output, 'wb') as f:
+            f.write('<?xml version="1.0" encoding="utf-8" ?>\n<tv>\n')
+            
+            for channel in api.epg():
+                f.write('<channel id="{}">\n<display-name>{}</display-name>\n<icon src="{}" />\n</channel>\n'.format(
+                    channel['ChannelId'], escape(channel['ChannelName']), escape(channel['ChannelLogo'].replace('_114X66', ''))))
 
-    for channel in api.epg():
-        epg += u'<channel id="{}">\n<display-name>{}</display-name>\n<icon src="{}" />\n</channel>\n'.format(
-            channel['ChannelId'], channel['ChannelName'], channel['ChannelLogo'].replace('_114X66', ''))
+                for program in channel.get('Programs', []):
+                    f.write(u'<programme channel="{}" start="{}" stop="{}">\n<title>{}</title>\n<desc>{}</desc>\n</programme>\n'.format(
+                        channel['ChannelId'], arrow.get(program['StartTime']).format('YYYYMMDDHHmmss Z'), arrow.get(program['EndTime']).format('YYYYMMDDHHmmss Z'), escape(program['Name']), escape(program['Description'])))
 
-        for program in channel.get('Programs', []):
-            epg += u'<programme channel="{}" start="{}" stop="{}">\n<title>{}</title>\n<desc>{}</desc>\n</programme>\n'.format(
-                channel['ChannelId'], arrow.get(program['StartTime']).format('YYYYMMDDHHmmss Z'), arrow.get(program['EndTime']).format('YYYYMMDDHHmmss Z'), program['Name'], program['Description'])
-
-    epg += '</tv>'
-    with open(output, 'wb') as f:
-        f.write(epg.encode('utf-8'))
+            f.write('</tv>')
+    except:
+        xbmc.executebuiltin('Skin.SetString(merge,error)')
+    else:
+        xbmc.executebuiltin('Skin.SetString(merge,ok)')

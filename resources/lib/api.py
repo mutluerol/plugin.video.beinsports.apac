@@ -3,7 +3,7 @@ import re
 import math
 import arrow
 
-from matthuisman import userdata, settings
+from matthuisman import userdata
 from matthuisman.session import Session
 from matthuisman.exceptions import Error
 
@@ -23,13 +23,10 @@ class API(object):
     def _set_authentication(self):
         token = userdata.get('token')
         if not token:
-            settings.setBool('_logged_in', False)
             return
 
         self._session.cookies.update({TOKEN_COOKIE_KEY: token})
         self.logged_in = True
-
-        settings.setBool('_logged_in', True)
 
     def login(self, username, password):
         self.logout()

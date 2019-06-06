@@ -51,6 +51,7 @@ ROUTE_SERVICE_INTERVAL = (60*5)
 ROUTE_LIVE_TAG         = '_l'
 ROUTE_LIVE_SUFFIX      = '.pvr'
 ROUTE_URL_TAG          = '_url'
+FORCE_RUN_FLAG         = '_force_run'
 #################
 
 #### INPUTSTREAM ADAPTIVE #####
