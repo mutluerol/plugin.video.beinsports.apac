@@ -1,3 +1,4 @@
+import io
 import arrow
 
 from xml.sax.saxutils import escape
@@ -111,8 +112,8 @@ def logout(**kwargs):
 @plugin.merge()
 @plugin.login_required()
 def playlist(output, **kwargs):
-    with open(output, 'wb') as f:
-        f.write('#EXTM3U\n\n')
+    with io.open(output, 'w', encoding='utf-8') as f:
+        f.write(u'#EXTM3U\n\n')
 
         for row in api.live_channels():
             f.write(u'#EXTINF:-1 tvg-id="{id}" tvg-logo="{logo}",{name}\n{path}\n\n'.format(
@@ -122,15 +123,15 @@ def playlist(output, **kwargs):
 @plugin.merge()
 @plugin.login_required()
 def epg(output, **kwargs):
-    with open(output, 'wb') as f:
-        f.write('<?xml version="1.0" encoding="utf-8" ?>\n<tv>\n')
+    with io.open(output, 'w', encoding='utf-8') as f:
+        f.write(u'<?xml version="1.0" encoding="utf-8" ?>\n<tv>\n')
         
         for channel in api.epg():
-            f.write('<channel id="{}">\n<display-name>{}</display-name>\n<icon src="{}" />\n</channel>\n'.format(
+            f.write(u'<channel id="{}">\n<display-name>{}</display-name>\n<icon src="{}" />\n</channel>\n'.format(
                 channel['ChannelId'], escape(channel['ChannelName']), escape(channel['ChannelLogo'].replace('_114X66', ''))))
 
             for program in channel.get('Programs', []):
                 f.write(u'<programme channel="{}" start="{}" stop="{}">\n<title>{}</title>\n<desc>{}</desc>\n</programme>\n'.format(
                     channel['ChannelId'], arrow.get(program['StartTime']).format('YYYYMMDDHHmmss Z'), arrow.get(program['EndTime']).format('YYYYMMDDHHmmss Z'), escape(program['Name']), escape(program['Description'])))
 
-        f.write('</tv>')
+        f.write(u'</tv>')

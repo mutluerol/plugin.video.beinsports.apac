@@ -45,6 +45,7 @@ ROUTE_RESET            = '_reset'
 ROUTE_SETTINGS         = '_settings'
 ROUTE_IA_SETTINGS      = '_ia_settings'
 ROUTE_IA_INSTALL       = '_ia_install'
+ROUTE_IA_QUALITY       = '_ia_quality'
 ROUTE_CLEAR_CACHE      = '_clear_cache'
 ROUTE_SERVICE          = '_service'
 ROUTE_SERVICE_INTERVAL = (60*5)

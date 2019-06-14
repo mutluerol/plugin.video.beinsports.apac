@@ -231,3 +231,31 @@ msgstr ""
 msgctxt "#32041"
 msgid "No Items"
 msgstr ""
+
+msgctxt "#32042"
+msgid "Set Inputstream Quality"
+msgstr ""
+
+msgctxt "#32043"
+msgid "Max"
+msgstr ""
+
+msgctxt "#32044"
+msgid "{bandwidth} MiB/s (1080p)"
+msgstr ""
+
+msgctxt "#32045"
+msgid "{bandwidth} MiB/s (720p)"
+msgstr ""
+
+msgctxt "#32046"
+msgid "{bandwidth} MiB/s (480p)"
+msgstr ""
+
+msgctxt "#32047"
+msgid "Quality set: {bandwidth} MiB/s"
+msgstr ""
+
+msgctxt "#32048"
+msgid "{bandwidth} MiB/s (540p)"
+msgstr ""

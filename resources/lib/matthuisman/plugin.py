@@ -5,7 +5,7 @@ from functools import wraps
 import xbmc, xbmcplugin
 
 from . import router, gui, settings, userdata, inputstream, signals
-from .constants import ROUTE_SETTINGS, ROUTE_RESET, ROUTE_SERVICE, ROUTE_CLEAR_CACHE, ROUTE_IA_SETTINGS, ROUTE_IA_INSTALL, ADDON_ICON, ADDON_FANART, ADDON_ID, ADDON_NAME
+from .constants import ROUTE_SETTINGS, ROUTE_RESET, ROUTE_SERVICE, ROUTE_CLEAR_CACHE, ROUTE_IA_SETTINGS, ROUTE_IA_INSTALL, ROUTE_IA_QUALITY, ADDON_ICON, ADDON_FANART, ADDON_ID, ADDON_NAME
 from .log import log
 from .language import _
 from .exceptions import PluginError
@@ -99,6 +99,10 @@ def _exception(e):
 @route('')
 def _home(**kwargs):
     raise PluginError(_.PLUGIN_NO_DEFAULT_ROUTE)
+
+@route(ROUTE_IA_QUALITY)
+def _ia_quality(**kwargs):
+    inputstream.set_quality()
 
 @route(ROUTE_IA_SETTINGS)
 def _ia_settings(**kwargs):

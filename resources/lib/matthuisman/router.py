@@ -25,7 +25,10 @@ def route(url):
 # @router.parse_url('?_=_settings')
 def parse_url(url):
     if url.startswith('?'):
-        params   = dict(parse_qsl(unquote(url.lstrip('?'))))
+        params = dict(parse_qsl(url.lstrip('?')))
+        for key in params:
+            params[key] = unquote(params[key])
+
         _url     = params.pop(ROUTE_TAG, '')
     else:
         params = {}

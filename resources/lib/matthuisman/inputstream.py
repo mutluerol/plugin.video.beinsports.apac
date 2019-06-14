@@ -57,18 +57,50 @@ class Widevine(InputstreamItem):
     def check(self):
         return install_widevine()
 
-def get_ia_addon():
+def get_ia_addon(required=False):
     try:
         xbmc.executebuiltin('InstallAddon({})'.format(IA_ADDON_ID), True)
         xbmc.executeJSONRPC('{{"jsonrpc":"2.0","id":1,"method":"Addons.SetAddonEnabled","params":{{"addonid":"{}","enabled":true}}}}'.format(IA_ADDON_ID))
         return xbmcaddon.Addon(IA_ADDON_ID)
     except:
-        return None
+        pass
+
+    if required:
+        raise InputStreamError(_.IA_NOT_FOUND)
+
+    return None
+
+def set_quality():
+    ia_addon = get_ia_addon(required=True)
+
+    options = [
+        #Label,           Min bandwith,  Max bandwith
+        [_.IA_QUALITY_MAX,   100000000,  100000000],
+        [_.IA_QUALITY_1080P, 8000000,    8000000],
+        [_.IA_QUALITY_720P,  6000000,    6000000],
+        [_.IA_QUALITY_540P,  4000000,    4000000],
+        [_.IA_QUALITY_480P,  2000000,    2000000],
+    ]
+
+    index = gui.select(heading=_.IA_QUALITY, options=[_(o[0], bandwidth=o[1]/1000000) for o in options])
+    if index < 0:
+        return
+
+    selected = options[index]
+
+    ia_addon.setSetting('IGNOREDISPLAY', 'true')
+    ia_addon.setSetting('STREAMSELECTION', '0')
+    ia_addon.setSetting('MEDIATYPE', '0')
+    ia_addon.setSetting('MAXRESOLUTION', '0')
+    ia_addon.setSetting('MAXRESOLUTIONSECURE', '0')
+
+    ia_addon.setSetting('MINBANDWIDTH', str(selected[1]))
+    ia_addon.setSetting('MAXBANDWIDTH', str(selected[2]))
+
+    gui.notification(_(_.IA_QUALITY_SET, bandwidth=selected[1]/1000000))
 
 def open_settings():
-    ia_addon = get_ia_addon()
-    if not ia_addon:
-        raise InputStreamError(_.IA_NOT_FOUND)
+    ia_addon = get_ia_addon(required=True)
     ia_addon.openSettings()
 
 def supports_hls():
@@ -84,10 +116,7 @@ def supports_playready():
     return bool(ia_addon and get_kodi_version() > 17 and xbmc.getCondVisibility('system.platform.android'))
 
 def install_widevine(reinstall=False):
-    ia_addon = get_ia_addon()
-    if not ia_addon:
-        raise InputStreamError(_.IA_NOT_FOUND)
-
+    ia_addon     = get_ia_addon(required=True)
     system, arch = _get_system_arch()
     kodi_version = get_kodi_version()
     ver_slug     = system + arch + str(kodi_version) + ia_addon.getAddonInfo('version')
